@@ -1,4 +1,5 @@
 'use client';
+import axios from 'axios';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { toast } from 'sonner';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const schema = z.object({
   firstName: z.string().min(1, 'Informe o seu nome'),
@@ -19,6 +23,9 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function SignUp() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -30,8 +37,18 @@ export default function SignUp() {
     resolver: zodResolver(schema)
   });
 
-  const handleSubmit = form.handleSubmit((formData) => {
-    console.log(formData);
+  const handleSubmit = form.handleSubmit(async (formData) => {
+    try {
+      setIsLoading(true);
+      await axios.post('/api/auth/sign-up', formData);
+      toast.success('Conta criada com sucesso!!');
+      router.push('/login');
+    } catch {
+      toast.error('Erro ao criar a conta.');
+    } finally {
+      setIsLoading(false);
+    };
+
   })
 
   return (
@@ -130,8 +147,17 @@ export default function SignUp() {
                 )}
               />
             </div>
-            <Button type="submit" className="w-full">Create an account</Button>
-            <Button type="button" className="w-full" variant={"outline"}>Sign up with Github</Button>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              Create an account
+            </Button>
+            <Button
+              type="button"
+              className="w-full"
+              variant={"outline"}
+              disabled={isLoading}
+            >
+              Sign up with Github
+            </Button>
           </form>
         </Form>
       </CardContent>

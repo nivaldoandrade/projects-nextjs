@@ -1,5 +1,6 @@
 'use client'
 
+import axios from "axios"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -10,23 +11,27 @@ import { useForm } from "react-hook-form"
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 
 const schema = z.object({
-  'email': z.string().email('Informe um email válido'),
-  "password": z.string().min(1, 'Informa a senha')
+  email: z.string().email('Informe um email válido'),
+  password: z.string().min(1, 'Informa a senha')
 })
 
 type FormData = z.infer<typeof schema>
-
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [isLoading, setIsLoading] = useState(false);
   const [catUrl, setCatUrl] = useState(() => {
     return localStorage.getItem('@auth-nextjs:cat') ?? '';
   });
+
+  const router = useRouter();
 
 
   const form = useForm<FormData>({
@@ -52,8 +57,17 @@ export function LoginForm({
     fetchNewCat();
   }, [])
 
-  const handleSubmit = form.handleSubmit((formData) => {
-    console.log(formData);
+  const handleSubmit = form.handleSubmit(async (formData) => {
+    try {
+      setIsLoading(true);
+      await axios.post('/api/auth/login', formData);
+
+      router.replace('/');
+    } catch {
+      toast.error("Credenciais inválidas!")
+    } finally {
+      setIsLoading(false);
+    }
   })
 
 
@@ -110,7 +124,7 @@ export function LoginForm({
                   )}
                 />
 
-                <Button type="submit" className="w-full">
+                <Button type="submit" disabled={isLoading} className="w-full">
                   Login
                 </Button>
                 <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
@@ -118,7 +132,7 @@ export function LoginForm({
                     Or continue with
                   </span>
                 </div>
-                <Button type="button" className="w-full" variant="outline">
+                <Button type="button" disabled={isLoading} className="w-full" variant="outline">
                   Entrar com o Google
                 </Button>
                 <div className="text-center text-sm">

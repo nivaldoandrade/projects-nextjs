@@ -1,5 +1,6 @@
 import { Package2 } from "lucide-react";
 import Link from "next/link";
+import { UserMenu } from "./UserMenu";
 
 
 export default function AppBar() {
@@ -45,6 +46,11 @@ export default function AppBar() {
           Analytics
         </Link>
       </nav>
+
+      <div className="ml-auto">
+        <UserMenu />
+      </div>
+
     </header>
   );
 }

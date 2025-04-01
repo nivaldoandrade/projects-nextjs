@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import AppBar from "./_components/Appbar";
-import { SignOut } from "./_components/SignOut";
+import { redirect } from "next/navigation";
 
 
 export default async function DashboardLayout({
@@ -11,7 +11,7 @@ export default async function DashboardLayout({
   const user = await auth();
 
   if (!user) {
-    return <SignOut />
+    redirect('/login')
   }
 
   return (

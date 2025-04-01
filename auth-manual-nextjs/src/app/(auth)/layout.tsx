@@ -1,4 +1,4 @@
-import { isAuthenticated } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function AuthLayout({
@@ -7,9 +7,9 @@ export default async function AuthLayout({
   children: React.ReactNode;
 }>) {
 
-  const isAuth = await isAuthenticated();
+  const isAuthenticated = Boolean(await auth());
 
-  if (isAuth) {
+  if (isAuthenticated) {
     redirect('/');
   }
 

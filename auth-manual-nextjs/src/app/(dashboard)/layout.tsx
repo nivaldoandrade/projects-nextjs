@@ -1,11 +1,18 @@
+import { auth } from "@/lib/auth";
 import AppBar from "./_components/Appbar";
+import { redirect } from "next/navigation";
 
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await auth();
+
+  if (!user) {
+    redirect('/login');
+  }
 
   return (
     <div className="flex w-full min-h-svh flex-col">

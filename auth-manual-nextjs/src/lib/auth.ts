@@ -1,6 +1,7 @@
 import { env } from "@/config/env";
 import { JwtPayload, verify } from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { prismaClient } from "./prisma";
 
 async function getAccessToken() {
    const cookiesStore = await cookies();
@@ -36,5 +37,25 @@ export async function isAuthenticated() {
 }
 
 export async function auth() {
-  return await verifyJWT();
+  const userId = await verifyJWT();
+
+  if(!userId) {
+    return null;
+  }
+
+  try {
+    const user = await prismaClient.user.findUnique(
+      {where: {
+        id: userId
+      }}
+    );
+
+    if(!user) {
+      return null;
+    }
+
+    return user;
+  } catch {
+    return null;
+  }
 }

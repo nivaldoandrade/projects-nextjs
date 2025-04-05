@@ -1,10 +1,10 @@
-import { auth } from "@/lib/auth";
+import { verifyJWT } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const user = await auth();
+  const userId = await verifyJWT();
 
-  if(!user) {
+  if(!userId) {
     return NextResponse.json(
       { error: 'Unauthorized'},
       {status: 401}
@@ -12,7 +12,7 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    userId: user.id,
+    userId,
     orders: [1,2,3,4,5]
   });
 }

@@ -10,7 +10,7 @@ async function getAccessToken() {
     return accessToken;
 }
 
-async function verifyJWT() {
+export async function verifyJWT() {
   const accessToken =  await getAccessToken();
 
   if(!accessToken) {

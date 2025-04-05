@@ -44,6 +44,8 @@ export async function auth() {
   }
 
   try {
+    await new Promise(resolve => setTimeout(resolve, 300));
+
     const user = await prismaClient.user.findUnique(
       {where: {
         id: userId

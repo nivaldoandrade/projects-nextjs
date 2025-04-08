@@ -23,6 +23,7 @@ export function UserMenu() {
       router.refresh();
     } catch {
       toast.error("Falha ao sair. Por favor, tente novamente");
+    } finally {
       setIsLoading(false);
     }
   };

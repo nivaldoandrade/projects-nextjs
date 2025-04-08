@@ -1,6 +1,17 @@
-export default function Dashboard() {
+import { auth } from "@/lib/auth";
+
+export default async function Dashboard() {
+  const user = await auth();
 
   return (
-    <h1>Dashboard</h1>
+    <div>
+      {!user && (
+        <h1>Dashboard - Anônimo</h1>
+      )}
+
+      {user && (
+        <h1>Dashboard - {user.firstName} {user.lastName}</h1>
+      )}
+    </div>
   );
 }

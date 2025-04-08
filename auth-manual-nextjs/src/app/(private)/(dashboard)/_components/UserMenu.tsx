@@ -9,6 +9,7 @@ import { CircleUser } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SignInButton } from "./SignInButton";
 
 export function UserMenu() {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +26,12 @@ export function UserMenu() {
       setIsLoading(false);
     }
   };
+
+  if (!user) {
+    return (
+      <SignInButton />
+    )
+  }
 
   return (
     <>

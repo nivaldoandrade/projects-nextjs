@@ -1,16 +1,20 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { SignInModal } from "./SignInModal";
+import { useState } from "react";
 
 export function SignInButton() {
-  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
 
-  function handleRedirectToLogin() {
-    router.replace('/login');
+  function handleOpenLoginModal() {
+    setIsOpen(true);
   }
 
   return (
-    <Button onClick={handleRedirectToLogin}>Entrar</Button>
+    <>
+      <Button onClick={handleOpenLoginModal}>Entrar</Button>
+      <SignInModal open={isOpen} onOpenChange={setIsOpen} />
+    </>
   )
 }

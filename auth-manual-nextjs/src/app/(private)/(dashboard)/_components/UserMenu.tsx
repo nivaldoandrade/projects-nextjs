@@ -20,7 +20,7 @@ export function UserMenu() {
     try {
       setIsLoading(true);
       await axios.post('/api/auth/sign-out');
-      router.replace('/login');
+      router.refresh();
     } catch {
       toast.error("Falha ao sair. Por favor, tente novamente");
       setIsLoading(false);

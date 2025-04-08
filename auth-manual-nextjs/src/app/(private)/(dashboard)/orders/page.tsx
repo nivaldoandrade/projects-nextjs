@@ -13,6 +13,16 @@ export default function Orders() {
     axios.get('/api/orders');
   }, [isSignedIn])
   return (
-    <h1>Orders</h1>
+    <div>
+      {!isSignedIn && (
+        <div className="w-full h-12 bg-slate-200 grid place-items-center rounded-lg text-slate-950">
+          Faça login para visualizar os seus pedidos!
+        </div>
+      )}
+
+      {isSignedIn && (
+        <h1>Seus pedidos</h1>
+      )}
+    </div>
   );
 }

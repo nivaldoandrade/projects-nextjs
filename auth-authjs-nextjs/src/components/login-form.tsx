@@ -8,17 +8,34 @@ import {
 } from '@/components/ui/card';
 import {
 	Field,
+	FieldContent,
 	FieldDescription,
+	FieldError,
 	FieldGroup,
 	FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { LoginSchema } from '@/schemas/loginSchema';
+import { useFormContext } from 'react-hook-form';
+
+type LoginFormProps = {
+	onSubmit: React.FormEventHandler<HTMLFormElement>;
+}
 
 export function LoginForm({
+	onSubmit,
 	className,
 	...props
-}: React.ComponentProps<'div'>) {
+}: React.ComponentProps<'div'> & LoginFormProps) {
+	const { register, clearErrors, formState: { errors } } = useFormContext<LoginSchema>();
+
+	function clearRootError() {
+		if (errors.root) {
+			clearErrors('root');
+		}
+	}
+
 	return (
 		<div className={cn('flex flex-col gap-6', className)} {...props}>
 			<Card>
@@ -29,16 +46,22 @@ export function LoginForm({
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<form>
+					<form onSubmit={onSubmit} noValidate>
 						<FieldGroup>
 							<Field>
 								<FieldLabel htmlFor="email">Email</FieldLabel>
-								<Input
-									id="email"
-									type="email"
-									placeholder="johndoe@mail.com"
-									required
-								/>
+								<FieldContent>
+									<Input
+										id="email"
+										type="email"
+										placeholder="johndoe@mail.com"
+										required
+										{...register('email', {
+											onChange: clearRootError,
+										})}
+									/>
+									<FieldError>{errors.email?.message}</FieldError>
+								</FieldContent>
 							</Field>
 							<Field>
 								<div className="flex items-center">
@@ -50,12 +73,18 @@ export function LoginForm({
 										Esqueceu sua senha?
 									</a>
 								</div>
-								<Input
-									id="password"
-									type="password"
-									placeholder="*********"
-									required
-								/>
+								<FieldContent>
+									<Input
+										id="password"
+										type="password"
+										placeholder="*********"
+										required
+										{...register('password', {
+											onChange: clearRootError,
+										})}
+									/>
+									<FieldError>{errors.password?.message || errors.root?.message}</FieldError>
+								</FieldContent>
 							</Field>
 							<Field>
 								<Button type="submit">Login</Button>

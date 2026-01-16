@@ -8,13 +8,24 @@ import {
 } from '@/components/ui/card';
 import {
 	Field,
+	FieldContent,
 	FieldDescription,
+	FieldError,
 	FieldGroup,
 	FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { SignUpSchema } from '@/schemas/signUpSchema';
+import { useFormContext } from 'react-hook-form';
 
-export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+type SignupFormProps = {
+	onSubmit: React.FormEventHandler<HTMLFormElement>;
+}
+
+export function SignupForm({ onSubmit, ...props }: SignupFormProps & React.ComponentProps<typeof Card>) {
+
+	const { register, formState: { errors } } = useFormContext<SignUpSchema>();
+
 	return (
 		<Card {...props}>
 			<CardHeader>
@@ -24,40 +35,71 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<form>
+				<form onSubmit={onSubmit} noValidate>
 					<FieldGroup>
 						<Field>
 							<FieldLabel htmlFor="name">Nome</FieldLabel>
-							<Input id="name" type="text" placeholder="John Doe" required />
+							<FieldContent>
+								<Input
+									id="name"
+									type="text"
+									placeholder="John Doe"
+									required
+									{...register('name')}
+								/>
+								<FieldError>{errors.name?.message}</FieldError>
+							</FieldContent>
 						</Field>
 						<Field>
-							<FieldLabel htmlFor="email">Email</FieldLabel>
-							<Input
-								id="email"
-								type="email"
-								placeholder="johndoe@mail.com"
-								required
-							/>
+							<FieldContent>
+								<FieldLabel htmlFor="email">Email</FieldLabel>
+								<Input
+									id="email"
+									type="email"
+									placeholder="johndoe@mail.com"
+									required
+									{...register('email')}
+								/>
+								<FieldError>{errors.email?.message}</FieldError>
+							</FieldContent>
 						</Field>
 						<Field>
-							<FieldLabel htmlFor="password">Senha</FieldLabel>
-							<div>
-								<Input id="password" type="password" required />
+							<FieldContent>
+								<FieldLabel htmlFor="password">Senha</FieldLabel>
 								<FieldDescription>
 									Deve ter pelo menos 8 caracteres.
 								</FieldDescription>
-							</div>
+							</FieldContent>
+							<FieldContent>
+								<Input
+									id="password"
+									type="password"
+									required
+									{...register('password')}
+								/>
+								<FieldError>{errors.password?.message}</FieldError>
+							</FieldContent>
+
 						</Field>
-						<Field>
-							<FieldLabel htmlFor="confirm-password">
-								Confirme a senha
-							</FieldLabel>
-							<div>
-								<Input id="confirm-password" type="password" required />
+						<Field orientation="responsive">
+							<FieldContent>
+								<FieldLabel htmlFor="confirm-password">
+									Confirme a senha
+								</FieldLabel>
 								<FieldDescription>
 									Por favor, confirme sua senha.
 								</FieldDescription>
-							</div>
+							</FieldContent>
+
+							<Input
+								id="confirm-password"
+								type="password"
+								required
+								{...register('confirmPassword')}
+							/>
+
+							<FieldError>{errors.confirmPassword?.message}</FieldError>
+
 						</Field>
 						<FieldGroup>
 							<Field>
@@ -70,6 +112,6 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 					</FieldGroup>
 				</form>
 			</CardContent>
-		</Card>
+		</Card >
 	);
 }

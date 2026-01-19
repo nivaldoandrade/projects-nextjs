@@ -3,10 +3,12 @@
 import { LoginForm } from '@/components/login-form';
 import { loginSchema, LoginSchema } from '@/schemas/loginSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSearchParams } from 'next/navigation';
 import { FormProvider, useForm } from 'react-hook-form';
 import { loginAction } from './loginActions';
 
 export default function Page() {
+	const searchParams = useSearchParams();
 
 	const form = useForm<LoginSchema>({
 		defaultValues: {
@@ -17,7 +19,8 @@ export default function Page() {
 	});
 
 	const handleSubmit = form.handleSubmit(async (data) => {
-		const { success, error } = await loginAction(data);
+		const callbackUrl = searchParams.get('callbackUrl');
+		const { success, error } = await loginAction(data, callbackUrl);
 
 		if (!success) {
 			form.setError('root', {

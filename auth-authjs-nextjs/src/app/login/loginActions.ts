@@ -4,7 +4,12 @@ import { signIn } from '@/lib/auth';
 import { LoginSchema } from '@/schemas/loginSchema';
 import { SignInError } from '@auth/core/errors';
 
-export async function loginAction(data: LoginSchema) {
+export async function loginAction(data: LoginSchema, callbackUrl: string | null) {
+
+	const redirectTo = (callbackUrl && callbackUrl.startsWith('/'))
+		? callbackUrl
+		: '/dashboard';
+
 	const { email, password } = data;
 	try {
 		await signIn(
@@ -12,7 +17,7 @@ export async function loginAction(data: LoginSchema) {
 			{
 				email,
 				password,
-				redirectTo: '/',
+				redirectTo,
 			},
 		);
 

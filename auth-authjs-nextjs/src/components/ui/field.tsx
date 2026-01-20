@@ -239,6 +239,6 @@ export {
 	FieldError,
 	FieldGroup, FieldLabel, FieldLegend,
 	FieldSeparator,
-	FieldSet, FieldTitle
+	FieldSet, FieldTitle,
 };
 

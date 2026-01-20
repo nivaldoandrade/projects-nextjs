@@ -1,4 +1,5 @@
-import { AppBar } from './_components/AppBar';
+import { SessionProvider } from 'next-auth/react';
+import { AppBar } from './_components/app-bar';
 
 export default function DashboardLayout({
 	children,
@@ -6,9 +7,11 @@ export default function DashboardLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<div>
-			<AppBar />
-			<main>{children}</main>
-		</div>
+		<SessionProvider>
+			<div>
+				<AppBar />
+				<main className="px-4">{children}</main>
+			</div>
+		</SessionProvider>
 	);
 }

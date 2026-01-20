@@ -6,7 +6,7 @@ import Credentials from 'next-auth/providers/credentials';
 import { $ZodError } from 'zod/v4/core';
 import prisma from './db';
 
-export const { signIn, auth } = NextAuth({
+export const { signIn, auth, signOut } = NextAuth({
 	providers: [
 		Credentials({
 			credentials: {

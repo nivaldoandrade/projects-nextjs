@@ -1,5 +1,6 @@
 
 import { loginSchema } from '@/schemas/loginSchema';
+import { PrismaAdapter } from '@auth/prisma-adapter';
 import { compare } from 'bcryptjs';
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
@@ -8,6 +9,10 @@ import { $ZodError } from 'zod/v4/core';
 import prisma from './db';
 
 export const { signIn, auth, signOut, handlers } = NextAuth({
+	adapter: PrismaAdapter(prisma),
+	session: {
+		strategy: 'jwt',
+	},
 	providers: [
 		Google,
 		Credentials({
@@ -25,7 +30,7 @@ export const { signIn, auth, signOut, handlers } = NextAuth({
 						where: { email },
 					});
 
-					if (!user) {
+					if (!user || !user.password) {
 						return null;
 					}
 

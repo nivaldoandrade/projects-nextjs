@@ -9,6 +9,9 @@ import { $ZodError } from 'zod/v4/core';
 import prisma from './db';
 
 export const { signIn, auth, signOut, handlers } = NextAuth({
+	pages: {
+		signIn: '/login',
+	},
 	adapter: PrismaAdapter(prisma),
 	session: {
 		strategy: 'jwt',

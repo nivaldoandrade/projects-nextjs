@@ -10,6 +10,10 @@ import { loginCredentialsAction } from './loginActions';
 export default function Page() {
 	const searchParams = useSearchParams();
 
+	const callbackError = searchParams.get('error') === 'OAuthAccountNotLinked'
+		? 'Faça login com e-mail e senha para depois vincular sua conta do Google.'
+		: undefined;
+
 	const form = useForm<LoginSchema>({
 		defaultValues: {
 			email: '',
@@ -20,7 +24,8 @@ export default function Page() {
 
 	const handleSubmit = form.handleSubmit(async (data) => {
 		const callbackUrl = searchParams.get('callbackUrl');
-		const { success, error } = await loginCredentialsAction(data, callbackUrl);
+		const callback = callbackError ? '/dashboard/settings' : callbackUrl;
+		const { success, error } = await loginCredentialsAction(data, callback);
 
 		if (!success) {
 			form.setError('root', {
@@ -33,7 +38,7 @@ export default function Page() {
 		<FormProvider {...form}>
 			<div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
 				<div className="w-full max-w-sm">
-					<LoginForm onSubmit={handleSubmit} />
+					<LoginForm onSubmit={handleSubmit} callbackError={callbackError} />
 				</div>
 			</div>
 		</FormProvider>

@@ -22,10 +22,12 @@ import { useFormContext } from 'react-hook-form';
 
 type LoginFormProps = {
 	onSubmit: React.FormEventHandler<HTMLFormElement>;
+	callbackError?: string;
 }
 
 export function LoginForm({
 	onSubmit,
+	callbackError,
 	className,
 	...props
 }: React.ComponentProps<'div'> & LoginFormProps) {
@@ -84,7 +86,7 @@ export function LoginForm({
 											onChange: clearRootError,
 										})}
 									/>
-									<FieldError>{errors.password?.message || errors.root?.message}</FieldError>
+									<FieldError>{errors.password?.message || errors.root?.message || callbackError}</FieldError>
 								</FieldContent>
 							</Field>
 							<Field>

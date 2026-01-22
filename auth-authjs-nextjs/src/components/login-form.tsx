@@ -1,3 +1,4 @@
+import { loginGoogleAction } from '@/app/login/loginActions';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -88,7 +89,11 @@ export function LoginForm({
 							</Field>
 							<Field>
 								<Button type="submit">Login</Button>
-								<Button variant="outline" type="button">
+								<Button
+									variant="outline"
+									type="button"
+									onClick={loginGoogleAction}
+								>
 									Login com Google
 								</Button>
 								<FieldDescription className="text-center">

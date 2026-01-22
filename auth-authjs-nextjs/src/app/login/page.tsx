@@ -5,7 +5,7 @@ import { loginSchema, LoginSchema } from '@/schemas/loginSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'next/navigation';
 import { FormProvider, useForm } from 'react-hook-form';
-import { loginAction } from './loginActions';
+import { loginCredentialsAction } from './loginActions';
 
 export default function Page() {
 	const searchParams = useSearchParams();
@@ -20,7 +20,7 @@ export default function Page() {
 
 	const handleSubmit = form.handleSubmit(async (data) => {
 		const callbackUrl = searchParams.get('callbackUrl');
-		const { success, error } = await loginAction(data, callbackUrl);
+		const { success, error } = await loginCredentialsAction(data, callbackUrl);
 
 		if (!success) {
 			form.setError('root', {

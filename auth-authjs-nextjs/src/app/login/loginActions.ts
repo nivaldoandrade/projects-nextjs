@@ -4,7 +4,7 @@ import { signIn } from '@/lib/auth';
 import { LoginSchema } from '@/schemas/loginSchema';
 import { SignInError } from '@auth/core/errors';
 
-export async function loginAction(data: LoginSchema, callbackUrl: string | null) {
+export async function loginCredentialsAction(data: LoginSchema, callbackUrl: string | null) {
 
 	const redirectTo = (callbackUrl && callbackUrl.startsWith('/'))
 		? callbackUrl
@@ -35,4 +35,8 @@ export async function loginAction(data: LoginSchema, callbackUrl: string | null)
 		throw error;
 	}
 
+}
+
+export async function loginGoogleAction() {
+	return await signIn('google');
 }

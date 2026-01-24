@@ -58,5 +58,29 @@ export const { signIn, auth, signOut, handlers } = NextAuth({
 		authorized: async ({ auth }) => {
 			return !!auth;
 		},
+		session: async ({ session, token }) => {
+			if (token.sub) {
+				session.user.id = token.sub;
+			}
+
+			return session;
+		},
+	},
+	events: {
+		linkAccount: async ({ account, profile }) => {
+			if (account?.provider === 'google' && profile?.email) {
+				await prisma.account.update({
+					where: {
+						provider_providerAccountId: {
+							provider: 'google',
+							providerAccountId: account.providerAccountId,
+						},
+					},
+					data: {
+						providerEmail: profile.email,
+					},
+				});
+			}
+		},
 	},
 });

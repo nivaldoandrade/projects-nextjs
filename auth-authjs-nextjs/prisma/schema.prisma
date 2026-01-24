@@ -30,6 +30,7 @@ model Account {
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
+  providerEmail     String? @map("provider_email")
   refresh_token     String?
   access_token      String?
   expires_at        Int?

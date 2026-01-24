@@ -1,8 +1,16 @@
 import { auth } from '@/lib/auth';
+import { EmailGoogleButton } from './_components/EmailGoogleButton';
 import { SignInWithGoogleButton } from './_components/SignInWithGoogleButton';
+import { getGoogleAccountEmail } from './actions/getGoogleAccountEmail';
 
 export default async function settings() {
 	const session = await auth();
+
+	if (!session?.user) {
+		return null;
+	}
+
+	const accountEmailGoogle = await getGoogleAccountEmail(session);
 
 	return (
 		<div>
@@ -19,10 +27,19 @@ export default async function settings() {
 									Google
 								</span>
 								<small className="text-[13px] leading-4 text-muted-foreground">
-									Vinculei a sua conta do Google.
+									{!accountEmailGoogle
+										? 'Vincule a sua conta do Google.'
+										: 'Conta do Google vinculada.'
+									}
 								</small>
 							</div>
-							<SignInWithGoogleButton />
+							{!accountEmailGoogle
+								? (
+									<SignInWithGoogleButton />
+								)
+								:
+								<EmailGoogleButton email={accountEmailGoogle} />
+							}
 						</div>
 					</div>
 				</div>

@@ -18,7 +18,11 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-export function FormLogin() {
+interface FormLoginProps {
+  onSubmit?(): void;
+}
+
+export function FormLogin({ onSubmit }: FormLoginProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
@@ -35,6 +39,11 @@ export function FormLogin() {
     try {
       setIsLoading(true);
       await axios.post('/api/auth/login', formData);
+
+      if (onSubmit) {
+        onSubmit();
+        return;
+      }
 
       router.replace('/');
     } catch {

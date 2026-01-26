@@ -1,5 +1,7 @@
 import { auth } from '@/lib/auth';
+import { Suspense } from 'react';
 import { EmailGoogleButton } from './_components/EmailGoogleButton';
+import SettingsErrorToast from './_components/SettingsErrorToast';
 import { SignInWithGoogleButton } from './_components/SignInWithGoogleButton';
 import { getGoogleAccountEmail } from './actions/getGoogleAccountEmail';
 
@@ -44,6 +46,9 @@ export default async function settings() {
 					</div>
 				</div>
 			</div>
+			<Suspense>
+				<SettingsErrorToast />
+			</Suspense>
 		</div>
 	);
 }

@@ -1,46 +1,44 @@
-'use client';
+import { LoginForm, LoginState } from './_components/login-form';
 
-import { LoginForm } from '@/components/login-form';
-import { loginSchema, LoginSchema } from '@/schemas/loginSchema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useSearchParams } from 'next/navigation';
-import { FormProvider, useForm } from 'react-hook-form';
-import { loginCredentialsAction } from './loginActions';
+type LoginPageParams = {
+	searchParams: Promise<{
+		error?: string
+		callbackUrl?: string
+	}>
+}
 
-export default function Page() {
-	const searchParams = useSearchParams();
+export default async function Page({ searchParams }: LoginPageParams) {
+	const { callbackUrl, error } = await searchParams;
 
-	const callbackError = searchParams.get('error') === 'OAuthAccountNotLinked'
-		? 'Faça login com e-mail e senha para depois vincular sua conta do Google.'
-		: undefined;
+	let initialLoginState: LoginState = {
+		method: 'credintials',
+		callbackUrl: callbackUrl,
+	};
 
-	const form = useForm<LoginSchema>({
-		defaultValues: {
-			email: '',
-			password: '',
-		},
-		resolver: zodResolver(loginSchema),
-	});
-
-	const handleSubmit = form.handleSubmit(async (data) => {
-		const callbackUrl = searchParams.get('callbackUrl');
-		const callback = callbackError ? '/dashboard/settings' : callbackUrl;
-		const { success, error } = await loginCredentialsAction(data, callback);
-
-		if (!success) {
-			form.setError('root', {
-				message: error,
-			});
+	if (error) {
+		switch (error) {
+			case 'Verification':
+				initialLoginState = {
+					method: 'magic-link',
+					callbackError: 'O link de verificação é inválido ou expirou. Por favor, tente fazer login novamente.',
+				};
+				break;
+			case 'OAuthAccountNotLinked':
+				initialLoginState = {
+					method: 'credintials',
+					callbackError: 'Faça login com e-mail e senha para depois vincular sua conta do Google.',
+				};
+				break;
+			default:
+				break;
 		}
-	});
+	}
 
 	return (
-		<FormProvider {...form}>
-			<div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-				<div className="w-full max-w-sm">
-					<LoginForm onSubmit={handleSubmit} callbackError={callbackError} />
-				</div>
+		<div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+			<div className="w-full max-w-sm">
+				<LoginForm initialState={initialLoginState} />
 			</div>
-		</FormProvider>
+		</div>
 	);
 }

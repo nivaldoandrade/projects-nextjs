@@ -1,10 +1,10 @@
 'use server';
 
 import { signIn } from '@/lib/auth';
-import { LoginSchema } from '@/schemas/loginSchema';
+import { CredentialsLoginSchema, MagicLinkLoginSchema } from '@/schemas/loginSchema';
 import { SignInError } from '@auth/core/errors';
 
-export async function loginCredentialsAction(data: LoginSchema, callbackUrl: string | null) {
+export async function loginCredentialsAction(data: CredentialsLoginSchema, callbackUrl: string | null | undefined) {
 
 	const redirectTo = (callbackUrl && callbackUrl.startsWith('/'))
 		? callbackUrl
@@ -39,4 +39,11 @@ export async function loginCredentialsAction(data: LoginSchema, callbackUrl: str
 
 export async function loginGoogleAction() {
 	return await signIn('google');
+}
+
+export async function loginMagiLinkAction(data: MagicLinkLoginSchema) {
+	await signIn('resend', {
+		data,
+		redirect: false,
+	});
 }

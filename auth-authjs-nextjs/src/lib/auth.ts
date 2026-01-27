@@ -1,22 +1,28 @@
 
-import { loginSchema } from '@/schemas/loginSchema';
+import { credentialsLoginSchema } from '@/schemas/loginSchema';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { compare } from 'bcryptjs';
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
+import Resend from 'next-auth/providers/resend';
 import { $ZodError } from 'zod/v4/core';
 import prisma from './db';
 
 export const { signIn, auth, signOut, handlers } = NextAuth({
 	pages: {
 		signIn: '/login',
+		error: '/login',
+		verifyRequest: '/login',
 	},
 	adapter: PrismaAdapter(prisma),
 	session: {
 		strategy: 'jwt',
 	},
 	providers: [
+		Resend({
+			from: 'onboarding@resend.dev',
+		}),
 		Google,
 		Credentials({
 			credentials: {
@@ -27,7 +33,7 @@ export const { signIn, auth, signOut, handlers } = NextAuth({
 				let user = null;
 
 				try {
-					const { email, password } = loginSchema.parse(credentials);
+					const { email, password } = credentialsLoginSchema.parse(credentials);
 
 					user = await prisma.user.findUnique({
 						where: { email },

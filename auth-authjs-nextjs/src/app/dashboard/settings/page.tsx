@@ -1,4 +1,5 @@
 import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { EmailGoogleButton } from './_components/EmailGoogleButton';
 import SettingsErrorToast from './_components/SettingsErrorToast';
@@ -10,6 +11,10 @@ export default async function settings() {
 
 	if (!session?.user) {
 		return null;
+	}
+
+	if (session.user.role !== 'ADMIN') {
+		redirect('/dashboard');
 	}
 
 	const accountEmailGoogle = await getGoogleAccountEmail(session);

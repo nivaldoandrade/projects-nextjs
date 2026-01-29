@@ -1,20 +1,16 @@
 import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { withRoleGuard } from '@/lib/withRoleGuard';
 import { Suspense } from 'react';
 import { EmailGoogleButton } from './_components/EmailGoogleButton';
 import SettingsErrorToast from './_components/SettingsErrorToast';
 import { SignInWithGoogleButton } from './_components/SignInWithGoogleButton';
 import { getGoogleAccountEmail } from './actions/getGoogleAccountEmail';
 
-export default async function settings() {
+export async function settings() {
 	const session = await auth();
 
 	if (!session?.user) {
 		return null;
-	}
-
-	if (session.user.role !== 'ADMIN') {
-		redirect('/dashboard');
 	}
 
 	const accountEmailGoogle = await getGoogleAccountEmail(session);
@@ -57,3 +53,5 @@ export default async function settings() {
 		</div>
 	);
 }
+
+export default withRoleGuard(settings, 'ADMIN');

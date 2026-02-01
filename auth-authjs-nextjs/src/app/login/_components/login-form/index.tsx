@@ -16,6 +16,7 @@ export type LoginMethod = 'credintials' | 'magic-link';
 
 export type LoginState = {
 	method: LoginMethod;
+	email?: string;
 	callbackError?: string;
 	callbackUrl?: string;
 }
@@ -56,6 +57,7 @@ export function LoginForm({
 					{loginState.method === 'credintials'
 						? (
 							<CredentialsForm
+								email={loginState.email}
 								callbackError={loginState.callbackError}
 								callbackUrl={loginState.callbackUrl}
 								onChangeFormType={toogleLoginMethod}

@@ -1,3 +1,6 @@
+'use client';
+
+import { signUpAction } from '@/app/signup/signUpAction';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -15,16 +18,52 @@ import {
 	FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { SignUpSchema } from '@/schemas/signUpSchema';
-import { useFormContext } from 'react-hook-form';
+import { signUpSchema, SignUpSchema } from '@/schemas/signUpSchema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2Icon } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { FieldPath, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
-type SignupFormProps = {
-	onSubmit: React.FormEventHandler<HTMLFormElement>;
-}
+export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+	const {
+		register,
+		getValues,
+		handleSubmit: handleSubmitRHF,
+		formState: { errors, isSubmitting },
+		setError,
+	} = useForm<SignUpSchema>({
+		defaultValues: {
+			name: '',
+			email: '',
+			password: '',
+			confirmPassword: '',
+		},
+		resolver: zodResolver(signUpSchema),
+	});
 
-export function SignupForm({ onSubmit, ...props }: SignupFormProps & React.ComponentProps<typeof Card>) {
+	const handleSubmit = handleSubmitRHF(async (data) => {
+		const { success, type, errors } = await signUpAction(data);
 
-	const { register, formState: { errors } } = useFormContext<SignUpSchema>();
+		if (!success) {
+			switch (type) {
+				case 'GLOBAL_ERRORS':
+					toast.error(errors);
+					return;
+
+				case 'FIELD_ERRORS':
+					Object.entries(errors?.fieldErrors ?? {}).forEach(([field, message]) => {
+						setError(field as FieldPath<SignUpSchema>, {
+							message: message[0],
+						});
+					});
+					return;
+			}
+		}
+		toast.success('A conta foi criada com sucesso!');
+		redirect(`/login?email=${getValues('email')}`);
+
+	});
 
 	return (
 		<Card {...props}>
@@ -35,7 +74,7 @@ export function SignupForm({ onSubmit, ...props }: SignupFormProps & React.Compo
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<form onSubmit={onSubmit} noValidate>
+				<form onSubmit={handleSubmit} noValidate>
 					<FieldGroup>
 						<Field>
 							<FieldLabel htmlFor="name">Nome</FieldLabel>
@@ -103,7 +142,13 @@ export function SignupForm({ onSubmit, ...props }: SignupFormProps & React.Compo
 						</Field>
 						<FieldGroup>
 							<Field>
-								<Button type="submit">Criar Conta</Button>
+								<Button
+									type="submit"
+									disabled={isSubmitting}
+								>
+									{isSubmitting && <Loader2Icon className="animate-spin" />}
+									{isSubmitting ? 'Criando a conta...' : 'Criar Conta'}
+								</Button>
 								<FieldDescription className="px-6 text-center">
 									Já tem uma conta? <a href="/login">Entrar</a>
 								</FieldDescription>

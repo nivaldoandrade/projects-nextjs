@@ -2,17 +2,19 @@ import { LoginForm, LoginState } from './_components/login-form';
 
 type LoginPageParams = {
 	searchParams: Promise<{
-		error?: string
-		callbackUrl?: string
+		error?: string;
+		email?: string;
+		callbackUrl?: string;
 	}>
 }
 
 export default async function Page({ searchParams }: LoginPageParams) {
-	const { callbackUrl, error } = await searchParams;
+	const { callbackUrl, error, email } = await searchParams;
 
 	let initialLoginState: LoginState = {
 		method: 'credintials',
 		callbackUrl: callbackUrl,
+		email,
 	};
 
 	if (error) {

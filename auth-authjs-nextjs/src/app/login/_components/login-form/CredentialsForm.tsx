@@ -7,12 +7,14 @@ import { useForm } from 'react-hook-form';
 import { loginCredentialsAction, loginGoogleAction } from '../../loginActions';
 
 interface ICredentailsFormProps {
+	email?: string;
 	callbackError?: string;
 	callbackUrl?: string;
 	onChangeFormType: () => void;
 }
 
 export function CredentialsForm({
+	email,
 	callbackError,
 	callbackUrl,
 	onChangeFormType,
@@ -26,7 +28,7 @@ export function CredentialsForm({
 		setError,
 	} = useForm<CredentialsLoginSchema>({
 		defaultValues: {
-			email: '',
+			email,
 			password: '',
 		},
 		resolver: zodResolver(credentialsLoginSchema),

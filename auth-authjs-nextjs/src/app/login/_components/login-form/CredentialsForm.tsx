@@ -3,6 +3,7 @@ import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLab
 import { Input } from '@/components/ui/input';
 import { credentialsLoginSchema, CredentialsLoginSchema } from '@/schemas/loginSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2Icon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { loginCredentialsAction, loginGoogleAction } from '../../loginActions';
 
@@ -23,7 +24,7 @@ export function CredentialsForm({
 	const {
 		register,
 		clearErrors,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 		handleSubmit: handleSubmitRHF,
 		setError,
 	} = useForm<CredentialsLoginSchema>({
@@ -93,20 +94,30 @@ export function CredentialsForm({
 					</FieldContent>
 				</Field>
 				<Field>
-					<Button type="submit">Login</Button>
+					<Button
+						type="submit"
+						disabled={isSubmitting}
+					>
+						{isSubmitting &&
+							<Loader2Icon className="animate-spin" />
+						}
+						{isSubmitting ? 'Entrando...' : 'Entrar'}
+					</Button>
 					<Button
 						variant="outline"
 						type="button"
 						onClick={loginGoogleAction}
+						disabled={isSubmitting}
 					>
-						Login com Google
+						Entrar com Google
 					</Button>
 					<Button
 						variant="outline"
 						type="button"
 						onClick={onChangeFormType}
+						disabled={isSubmitting}
 					>
-						Login com Magic Link
+						Entrar com Magic Link
 					</Button>
 					<FieldDescription className="text-center">
 						Não tem uma conta?

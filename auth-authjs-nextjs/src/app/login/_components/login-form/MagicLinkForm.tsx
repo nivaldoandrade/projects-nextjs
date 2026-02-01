@@ -3,6 +3,7 @@ import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from '@/compo
 import { Input } from '@/components/ui/input';
 import { magicLinkLoginSchema, MagicLinkLoginSchema } from '@/schemas/loginSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2Icon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { loginMagiLinkAction } from '../../loginActions';
@@ -15,7 +16,7 @@ interface IMagicLinkFormProps {
 export function MagicLinkForm({ onChangeFormType, callbackError }: IMagicLinkFormProps) {
 	const {
 		register,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 		reset,
 		handleSubmit: handleSubmitRHF,
 	} = useForm<MagicLinkLoginSchema>({
@@ -48,13 +49,18 @@ export function MagicLinkForm({ onChangeFormType, callbackError }: IMagicLinkFor
 					</FieldContent>
 				</Field>
 				<Field>
-					<Button type="submit">
-						Enviar Magic Link
+					<Button type="submit" disabled={isSubmitting}>
+						{isSubmitting &&
+							<Loader2Icon className="animate-spin" />
+						}
+						{isSubmitting ? 'Enviando...' : 'Enviar Magic Link'}
 					</Button>
 					<Button
 						variant='outline'
 						type="button"
-						onClick={onChangeFormType}>
+						onClick={onChangeFormType}
+						disabled={isSubmitting}
+					>
 						Voltar
 					</Button>
 				</Field>

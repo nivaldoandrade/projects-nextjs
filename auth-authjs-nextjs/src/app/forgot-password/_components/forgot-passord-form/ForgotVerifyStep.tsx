@@ -2,11 +2,13 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { ResetSchema } from '@/schemas/resetSchema';
-import { Loader2Icon } from 'lucide-react';
+import { Loader2Icon, RotateCcwIcon } from 'lucide-react';
 import { redirect, RedirectType } from 'next/navigation';
-import { useFormContext } from 'react-hook-form';
+import { FieldPath, useFormContext } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Steps } from '.';
+import { generateAndSendResetCode } from '../../actions/generateAndSendResetCode';
+import { resetPasswordAction } from '../../actions/resetPasswordAction';
 
 interface IForgotVerifyStep {
 	onChangeStep: (stepState: Steps) => void;
@@ -18,11 +20,55 @@ export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
 		register,
 		formState: { errors, isSubmitting },
 		handleSubmit: handleSubmitRHF,
+		setError,
+		clearErrors,
+		getValues,
 	} = useFormContext<ResetSchema>();
+
+	async function handleResendResetCode() {
+		const email = getValues('emailStep.email');
+
+		const { success } = await generateAndSendResetCode(email);
+
+		if (!success) {
+			toast.error('Não foi possível enviar o código. Tente novamente.');
+			return;
+		}
+
+		toast.success('Código reenviado com sucesso!');
+		clearErrors('verifyStep.code');
+
+	}
 
 	const handleSubmit = handleSubmitRHF(async (data) => {
 		await new Promise(resolve => setTimeout(resolve, 2000));
-		console.log(data);
+		const { success, errors, type } = await resetPasswordAction(data);
+
+		if (!success) {
+			switch (type) {
+				case 'CODE_INVALID':
+					setError('verifyStep.code',
+						{ message: errors },
+						{ shouldFocus: true },
+					);
+					toast.error(errors);
+					return;
+				case 'CODE_EXPIRE':
+					setError('verifyStep.code',
+						{ message: errors, type: 'deps' },
+						{ shouldFocus: true },
+					);
+					toast.error(errors);
+					return;
+				case 'FIELD_ERRORS':
+					Object.entries(errors?.fieldErrors ?? {}).forEach(([field, message]) => {
+						setError(field as FieldPath<ResetSchema>, {
+							message: message[0],
+						});
+					});
+					return;
+			}
+		}
 
 		toast.success('Senha redefinida com sucesso!');
 		redirect('/login', RedirectType.replace);
@@ -54,7 +100,19 @@ export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
 							required
 							{...register('verifyStep.code')}
 						/>
-						<FieldError>{errors.verifyStep?.code?.message}</FieldError>
+						<FieldError className="flex items-center gap-2">
+							{errors.verifyStep?.code?.message}
+							{errors.verifyStep?.code?.type === 'deps' &&
+								<Button
+									type='button'
+									variant="outline"
+									size="icon-sm"
+									onClick={handleResendResetCode}
+								>
+									<RotateCcwIcon className='size-4' />
+								</Button>
+							}
+						</FieldError>
 					</FieldContent>
 				</Field>
 				<Field>

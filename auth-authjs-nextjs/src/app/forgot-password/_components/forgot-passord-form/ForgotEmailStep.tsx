@@ -5,7 +5,9 @@ import { ResetSchema } from '@/schemas/resetSchema';
 import { Loader2Icon } from 'lucide-react';
 import { useTransition } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { toast } from 'sonner';
 import { Steps } from '.';
+import { generateAndSendResetCode } from '../../actions/generateAndSendResetCode';
 
 interface IForgotEmailStepProps {
 	onChangeStep: (stepState: Steps) => void;
@@ -19,6 +21,7 @@ export function ForgotEmailStep({ onChangeStep }: IForgotEmailStepProps) {
 		register,
 		trigger,
 		formState: { errors },
+		getValues,
 	} = useFormContext<ResetSchema>();
 
 	function handleVerifyStep() {
@@ -29,9 +32,20 @@ export function ForgotEmailStep({ onChangeStep }: IForgotEmailStepProps) {
 				shouldFocus: true,
 			});
 
-			if (isValid) {
-				onChangeStep('verify');
+			const email = getValues('emailStep.email');
+
+			if (!isValid) {
+				return;
 			}
+
+			const { success } = await generateAndSendResetCode(email);
+
+			if (!success) {
+				toast.error('Não foi possível enviar o código. Tente novamente.');
+				return;
+			}
+
+			onChangeStep('verify');
 		});
 	}
 

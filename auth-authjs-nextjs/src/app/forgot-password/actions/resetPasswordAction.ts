@@ -20,7 +20,7 @@ type resetPasswordActionResult =
 	}
 	| {
 		success: false,
-		type: 'CODE_INVALID' | 'CODE_EXPIRE'
+		type: 'CODE_INVALID'
 		errors: string;
 	};
 
@@ -76,7 +76,7 @@ export async function resetPasswordAction(resetData: ResetSchema): Promise<reset
 		return {
 			success: false,
 			type: 'CODE_INVALID',
-			errors: 'Código inválido',
+			errors: 'O código está incorreto ou inválido',
 		};
 	}
 
@@ -85,8 +85,8 @@ export async function resetPasswordAction(resetData: ResetSchema): Promise<reset
 	if (expires <= now) {
 		return {
 			success: false,
-			type: 'CODE_EXPIRE',
-			errors: 'Código expirou! Faça uma nova solicitação',
+			type: 'CODE_INVALID',
+			errors: 'O código está incorreto ou inválido',
 		};
 	}
 

@@ -1,9 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { ResetSchema } from '@/schemas/resetSchema';
-import { Loader2Icon, RotateCcwIcon } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { redirect, RedirectType } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { FieldPath, useFormContext } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Steps } from '.';
@@ -15,18 +17,40 @@ interface IForgotVerifyStep {
 }
 
 export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
+	const [retryCooldown, setRetryCooldown] = useState(60);
 
 	const {
 		register,
 		formState: { errors, isSubmitting },
 		handleSubmit: handleSubmitRHF,
 		setError,
-		clearErrors,
 		getValues,
 	} = useFormContext<ResetSchema>();
 
-	async function handleResendResetCode() {
+	useEffect(() => {
+		if (retryCooldown <= 0) {
+			return;
+		}
+
+		const timer = setTimeout(() => {
+			setRetryCooldown(prevState => prevState - 1);
+		}, 1000);
+
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [retryCooldown]);
+
+	async function handleResendVerificationCode() {
+		if (isRetryCooldown) {
+			return;
+		}
+
 		const email = getValues('emailStep.email');
+
+		if (!email) {
+			return;
+		}
 
 		const { success } = await generateAndSendResetCode(email);
 
@@ -36,12 +60,10 @@ export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
 		}
 
 		toast.success('Código reenviado com sucesso!');
-		clearErrors('verifyStep.code');
-
+		setRetryCooldown(60);
 	}
 
 	const handleSubmit = handleSubmitRHF(async (data) => {
-		await new Promise(resolve => setTimeout(resolve, 2000));
 		const { success, errors, type } = await resetPasswordAction(data);
 
 		if (!success) {
@@ -49,13 +71,6 @@ export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
 				case 'CODE_INVALID':
 					setError('verifyStep.code',
 						{ message: errors },
-						{ shouldFocus: true },
-					);
-					toast.error(errors);
-					return;
-				case 'CODE_EXPIRE':
-					setError('verifyStep.code',
-						{ message: errors, type: 'deps' },
 						{ shouldFocus: true },
 					);
 					toast.error(errors);
@@ -73,6 +88,9 @@ export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
 		toast.success('Senha redefinida com sucesso!');
 		redirect('/login', RedirectType.replace);
 	});
+	;
+
+	const isRetryCooldown = retryCooldown > 0;
 
 	return (
 		<form onSubmit={handleSubmit} noValidate>
@@ -102,16 +120,6 @@ export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
 						/>
 						<FieldError className="flex items-center gap-2">
 							{errors.verifyStep?.code?.message}
-							{errors.verifyStep?.code?.type === 'deps' &&
-								<Button
-									type='button'
-									variant="outline"
-									size="icon-sm"
-									onClick={handleResendResetCode}
-								>
-									<RotateCcwIcon className='size-4' />
-								</Button>
-							}
 						</FieldError>
 					</FieldContent>
 				</Field>
@@ -171,6 +179,23 @@ export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
 						disabled={isSubmitting}
 					>
 						Voltar
+					</Button>
+				</Field>
+				<Field>
+					<Button
+						type="button"
+						variant="link"
+						disabled={isRetryCooldown || isSubmitting}
+						onClick={handleResendVerificationCode}
+						className={cn(
+							'text-center text-sm text-muted-foreground',
+							isRetryCooldown, 'text-inherit',
+						)}
+					>
+						{isRetryCooldown
+							? `Reenviar o código em ${retryCooldown}`
+							: 'Reenviar o código'
+						}
 					</Button>
 				</Field>
 			</FieldGroup>

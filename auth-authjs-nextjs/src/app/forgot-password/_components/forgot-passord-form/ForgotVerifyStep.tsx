@@ -76,11 +76,12 @@ export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
 					toast.error(errors);
 					return;
 				case 'FIELD_ERRORS':
-					Object.entries(errors?.fieldErrors ?? {}).forEach(([field, message]) => {
-						setError(field as FieldPath<ResetSchema>, {
-							message: message[0],
-						});
+
+					errors.forEach(({ path, message }) => {
+						const field = path.join('.') as FieldPath<ResetSchema>;
+						setError(field, { message });
 					});
+
 					return;
 			}
 		}
@@ -106,6 +107,9 @@ export function ForgotVerifyStep({ onChangeStep }: IForgotVerifyStep) {
 							required
 							{...register('emailStep.email')}
 						/>
+						<FieldError className="flex items-center gap-2">
+							{errors.emailStep?.email?.message}
+						</FieldError>
 					</FieldContent>
 				</Field>
 				<Field>

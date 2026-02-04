@@ -4,8 +4,7 @@ import prisma from '@/lib/db';
 import { hashCode } from '@/lib/utils';
 import { ResetSchema, resetSchema } from '@/schemas/resetSchema';
 import { hash } from 'bcryptjs';
-import { flattenError } from 'zod';
-import { typeToFlattenedError } from 'zod/v3';
+import { $ZodIssue } from 'zod/v4/core';
 
 type resetPasswordActionResult =
 	| {
@@ -14,13 +13,13 @@ type resetPasswordActionResult =
 		errors?: undefined;
 	}
 	| {
-		success: false,
-		type: 'FIELD_ERRORS'
-		errors: typeToFlattenedError<ResetSchema>
+		success: false;
+		type: 'FIELD_ERRORS';
+		errors: $ZodIssue[]
 	}
 	| {
-		success: false,
-		type: 'CODE_INVALID'
+		success: false;
+		type: 'CODE_INVALID';
 		errors: string;
 	};
 
@@ -28,10 +27,11 @@ export async function resetPasswordAction(resetData: ResetSchema): Promise<reset
 	const { success, data, error } = resetSchema.safeParse(resetData);
 
 	if (!success) {
+
 		return {
 			success: false,
 			type: 'FIELD_ERRORS',
-			errors: flattenError(error),
+			errors: error.issues,
 		};
 	}
 

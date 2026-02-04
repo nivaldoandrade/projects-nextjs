@@ -3,16 +3,35 @@
 import prisma from '@/lib/db';
 import { resend } from '@/lib/resend';
 import { hashCode } from '@/lib/utils';
+import { enforceRateLimit } from './utils/enforceRateLimit';
 
 export async function generateAndSendResetCode(email: string) {
 	const user = await prisma.user.findUnique({
 		where: {
 			email,
 		},
+		select: {
+			id: true,
+			forgotPasswordCodes: {
+				select: {
+					attempts: true,
+					lastSentAt: true,
+				},
+			},
+		},
 	});
 
 	if (!user) {
 		return { success: true };
+	}
+
+	const rateLimit = await enforceRateLimit(user.forgotPasswordCodes);
+
+	if (!rateLimit.success) {
+		return {
+			success: rateLimit.success,
+			type: rateLimit.type,
+		};
 	}
 
 	const code = generateCode();
@@ -25,11 +44,14 @@ export async function generateAndSendResetCode(email: string) {
 		update: {
 			code: codeHash,
 			expires,
+			attempts: rateLimit.attempts + 1,
+			lastSentAt: new Date(),
 		},
 		create: {
 			userId: user.id,
 			code: codeHash,
 			expires,
+			attempts: rateLimit.attempts + 1,
 		},
 	});
 
@@ -58,3 +80,4 @@ function generateCode(length = 8) {
 	const code = Math.floor(Math.random() * (max - min + 1)) + min;
 	return code.toString();
 }
+

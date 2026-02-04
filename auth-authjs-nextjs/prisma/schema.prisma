@@ -65,10 +65,12 @@ model VerificationToken {
 }
 
 model ForgotPasswordCode {
-  userId    String   @id
-  code      String
-  expires   DateTime
-  createdAt DateTime @default(now()) @map("created_at")
+  userId     String   @id
+  code       String
+  expires    DateTime
+  attempts   Int
+  lastSentAt DateTime @default(now()) @map("last_send_at")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

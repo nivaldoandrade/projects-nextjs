@@ -26,7 +26,7 @@ export function EmailGoogleButton({ email }: IEmailGoogleButton) {
 					{email}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent align="center" className="rounded-md p-0 flex items-center justify-center gap-1">
+			<PopoverContent align="center" className="w-full rounded-md p-0 flex items-center justify-center gap-1">
 				<Button
 					variant="ghost"
 					size="sm"

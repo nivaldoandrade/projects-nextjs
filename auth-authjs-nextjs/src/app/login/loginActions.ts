@@ -42,7 +42,7 @@ export async function loginGoogleAction() {
 }
 
 export async function loginMagiLinkAction(data: MagicLinkLoginSchema) {
-	await signIn('resend', {
+	await signIn('magic-link', {
 		...data,
 		redirect: false,
 	});

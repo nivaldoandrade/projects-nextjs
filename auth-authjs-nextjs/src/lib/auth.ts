@@ -9,6 +9,15 @@ import Resend from 'next-auth/providers/resend';
 import { $ZodError } from 'zod/v4/core';
 import prisma from './db';
 
+const getNameFromEmail = (email?: string | null) => {
+	if (!email) {
+		return null;
+	}
+
+	const [localPart] = email.split('@');
+	return localPart?.trim() ? localPart.trim() : null;
+};
+
 export const { signIn, auth, signOut, handlers } = NextAuth({
 	pages: {
 		signIn: '/login',
@@ -21,6 +30,7 @@ export const { signIn, auth, signOut, handlers } = NextAuth({
 	},
 	providers: [
 		Resend({
+			id: 'magic-link',
 			from: 'onboarding@resend.dev',
 		}),
 		Google,
@@ -72,6 +82,7 @@ export const { signIn, auth, signOut, handlers } = NextAuth({
 			return token;
 		},
 		session: async ({ session, token }) => {
+
 			if (token.sub) {
 				session.user.id = token.sub;
 			}
@@ -80,10 +91,34 @@ export const { signIn, auth, signOut, handlers } = NextAuth({
 				session.user.role = token.role;
 			}
 
+			if (!token.name) {
+				session.user.name = getNameFromEmail(token.email);
+			}
+
 			return session;
 		},
 	},
 	events: {
+		signIn: async ({ user, account, isNewUser }) => {
+			if (account?.provider === 'magic-link') {
+				const shouldUpdateName = isNewUser || !user?.name;
+
+				if (!shouldUpdateName) {
+					return;
+				}
+
+				const derivedName = getNameFromEmail(user.email);
+
+				if (!derivedName) {
+					return;
+				}
+
+				await prisma.user.update({
+					where: { id: user.id },
+					data: { name: derivedName },
+				});
+			}
+		},
 		linkAccount: async ({ account, profile }) => {
 			if (account?.provider === 'google' && profile?.email) {
 				await prisma.account.update({
